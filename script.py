@@ -3,35 +3,14 @@ import pwd
 import urllib.request
 import json
 import time
+from sense_hat import SenseHat
 
-import random # temp: for testing
-
-
-
-
+sense = SenseHat()
 backend_api_url = "https://iot-raspberrypi-backend-12a94ca200cf.herokuapp.com"
-
 
 # fetches current user from os
 def get_user_identifier():
     return pwd.getpwuid(os.getuid())[0]
-
-# fetches humidity from sensor
-def getHumidity():
-    return random.randint(0, 1000) # temp: for testing
-
-# fetches temperature from sensor
-def getTremperature():
-    return random.randint(0, 1000) # temp: for testing
-
-# fetches pressure from sensor
-def getPressure():
-    return random.randint(0, 1000) # temp: for testing
-
-
-
-
-
 
 def send_post_request(endpoint, payload):
     """
@@ -64,16 +43,11 @@ def send_post_request(endpoint, payload):
         print(f"URL error occurred: {e.reason}")
         return None, None
 
-
-
-
-
-
 # sends HTTP POST request containing the current humidity as the payload
-def submitHumidity():
+def submit_humidity():
     payload = {
         "deviceId": get_user_identifier(),
-        "value": str(getHumidity())
+        "value": str(sense.get_humidity())
     }
 
     response_data, status_code = send_post_request("/humidities", payload)
@@ -85,10 +59,10 @@ def submitHumidity():
         print("Request failed.")
 
 # sends HTTP POST request containing the current pressure as the payload
-def submitPressure():
+def submit_pressure():
     payload = {
         "deviceId": get_user_identifier(),
-        "value": str(getPressure())
+        "value": str(sense.get_pressure())
     }
 
     response_data, status_code = send_post_request("/pressures", payload)
@@ -100,10 +74,10 @@ def submitPressure():
         print("Request failed.")
 
 # sends HTTP POST request containing the current temperature as the payload
-def submitTemperature():
+def submit_temperature():
     payload = {
         "deviceId": get_user_identifier(),
-        "value": str(getTremperature())
+        "value": str(sense.get_temperature())
     }
 
     response_data, status_code = send_post_request("/temperatures", payload)
@@ -114,15 +88,12 @@ def submitTemperature():
     else:
         print("Request failed.")
 
-
-
-
 # main loop to run all functions every 5 seconds (CTRL+C will stop the program)
 try:
     while True:
-        submitHumidity()
-        submitPressure()
-        submitTemperature()
+        submit_humidity()
+        submit_pressure()
+        submit_temperature()
 
         time.sleep(5)
 except KeyboardInterrupt:
